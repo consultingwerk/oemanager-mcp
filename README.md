@@ -18,6 +18,25 @@ or
 
 When --configFile is not specified, we're defaulting to %AppData%\Consultingwerk\oemanager.conf
 
+## Sample mcp_config.json
+
+```
+{
+    "mcpServers": {
+        "oemanmager-mcp": {
+            "command": "C:\\Path\\oemanager-mcp\\bin\\Debug\\net8.0\\win-x64\\oemanager-mcp.exe",
+            "args": [
+                "--defaultConnection",
+                "smartpas_stream"
+            ],
+            "disabledTools": [],
+            "disabled": false
+        }        
+    }
+}
+```
+
+
 ## MCP Server Tool
 
 Show configured connections
