@@ -1,16 +1,40 @@
+using Config;
 using System.ComponentModel;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using ModelContextProtocol.Server;
 
+#pragma warning disable CA1822
+
 internal class OeManagerTools
 {
     [McpServerTool]
-    [Description("Returns the status of the AppServer (PASOE) Agents")]
-    public string ShowAppServerAgentStatus()
+    [Description("Returns all configured AppServer or OEMANAGER connections (Label, Url, applicationName)")]
+    public string ShowConnections()
     {
-        return this.ShowAppServerAgentStatusAsync(Configuration.PasoeUrl, Configuration.AppName, Configuration.Username, Configuration.Password).Result;
+        var items = new List<object>();
+
+        foreach (var connection in Configuration.Connections)
+        {
+            items.Add(new
+            {
+                connection.Label,
+                connection.Url,
+                connection.ApplicationName
+                
+            });
+        }
+
+        return JsonSerializer.Serialize(items);
+    }
+
+    [McpServerTool]
+    [Description("Returns the status of the AppServer (PASOE) Agents")]
+    public string ShowAppServerAgentStatus([Description("The Label of the connection to use (optional)")] string connectionName)
+    {
+        var connection = Configuration.GetConnection(connectionName);
+        return this.ShowAppServerAgentStatusAsync(connection.Url, connection.ApplicationName, connection.Username, connection.Password).Result;
     }
 
     protected async Task<string> ShowAppServerAgentStatusAsync(string baseUrl, string appName, string username, string password)
@@ -22,7 +46,7 @@ internal class OeManagerTools
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
         
         // Construct the endpoint URL
-        var endpoint = $"{baseUrl}/oemanager/applications/{appName}/agents";
+        var endpoint = $"{baseUrl}/applications/{appName}/agents";
         
         try
         {
@@ -38,19 +62,20 @@ internal class OeManagerTools
         }
         catch (HttpRequestException ex)
         {
-            return $"Error calling API: {ex.Message}";
+            return $"Error calling API {endpoint}: {ex.Message}";
         }
         catch (Exception ex)
         {
-            return $"Unexpected error: {ex.Message}";
+            return $"Error calling API {endpoint}: {ex.Message}";
         }
     }
 
     [McpServerTool]
-    [Description("Terminates all AppServer (PASOE) Agents")]
-    public string TrimAppServerAgents()
+    [Description("Terminates or Trims all AppServer (PASOE) Agents")]
+    public string TrimAppServerAgents([Description("The Label of the connection to use (optional)")] string connectionName)
     {
-        return this.TrimAppServerAgentsAsync(Configuration.PasoeUrl, Configuration.AppName, Configuration.Username, Configuration.Password).Result;
+        var connection = Configuration.GetConnection(connectionName);
+        return this.TrimAppServerAgentsAsync(connection.Url, connection.ApplicationName, connection.Username, connection.Password).Result;
     }
 
     protected async Task<string> TrimAppServerAgentsAsync(string baseUrl, string appName, string username, string password)
@@ -66,7 +91,7 @@ internal class OeManagerTools
         try
         {
             // Step 1: Get all agents
-            var getEndpoint = $"{baseUrl}/oemanager/applications/{appName}/agents";
+            var getEndpoint = $"{baseUrl}/applications/{appName}/agents";
             var getResponse = await httpClient.GetAsync(getEndpoint);
             getResponse.EnsureSuccessStatusCode();
             
@@ -89,7 +114,7 @@ internal class OeManagerTools
                         var agentId = agentIdElement.GetString();
                         
                         // Delete the agent with default wait parameters
-                        var deleteEndpoint = $"{baseUrl}/oemanager/applications/{appName}/agents/{agentId}?waitToFinish=120000&waitAfterStop=60000";
+                        var deleteEndpoint = $"{baseUrl}/applications/{appName}/agents/{agentId}?waitToFinish=120000&waitAfterStop=60000";
                         
                         try
                         {
