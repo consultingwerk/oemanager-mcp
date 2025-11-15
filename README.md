@@ -6,15 +6,15 @@ This MCP Server supports basic interaction with an OpenEdge PASOE AppServer. The
 
 The MCP Server currently only supports the stdio protocol. The oemanager-mcp.exe supports two sets of startup parameters:
 
---pasoeUrl - The URL to the OEMANAGER, e.g. https://localhost:8811/oemanager 
---appName - The name of the ABL application to monitor, e.g. oepas1
---username - The username to use for authentication, e.g. tomcat 
---password - The password to use for authentication, e.g. tomcat
+* --pasoeUrl - The URL to the OEMANAGER, e.g. https://localhost:8811/oemanager 
+* --appName - The name of the ABL application to monitor, e.g. oepas1
+* --username - The username to use for authentication, e.g. tomcat 
+* --password - The password to use for authentication, e.g. tomcat
 
 or 
 
---defaultConnection - The Label or applicationName of the default connection, e.g. oepas1
---configFile - The path to the configuration file with oemanager connections, see https://marketplace.visualstudio.com/items?itemName=ConsultingwerkApplicationModernizationSolutionsLtd.oemanager
+* --defaultConnection - The Label or applicationName of the default connection, e.g. oepas1
+* --configFile - The path to the configuration file with oemanager connections, see https://marketplace.visualstudio.com/items?itemName=ConsultingwerkApplicationModernizationSolutionsLtd.oemanager
 
 When --configFile is not specified, we're defaulting to %AppData%\Consultingwerk\oemanager.conf
 
